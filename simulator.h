@@ -6,7 +6,7 @@ using namespace std;
 #define mul_cycles 10
 #define div_cycles 40
 
-enum opcode {add,sub,mul,div};
+
 struct InstrRecord
 {
   int opcode;        // opcode of the instruction; 0-add,1-sub,2-mul,3-div
@@ -23,11 +23,12 @@ struct ExecutionUnit{
   int rsTag;
   int val;
   int writebackCycle;
+  bool busy=false;
 };
 
 struct ReservationStation
 {
-  bool busy;
+  bool busy=false;
   int Qj;
   int Qk;
   int Vj;
