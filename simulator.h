@@ -16,7 +16,10 @@ struct InstrRecord
 
 struct Broadcast{
   int rsTag;
-  int val;
+  int result;
+  bool willBroadcast=false;           // unit will broadCast in this cycle
+  bool freeUnit=true;                 // free the unit
+  bool unitIsAdd=false;
 };
 
 struct ExecutionUnit{
@@ -33,22 +36,20 @@ struct ReservationStation
   int Qk=-1;                    // tag of second RS its waiting for
   int Vj;                       // value of operand 1
   int Vk;                       // value of operand 2
-  int latency;
   int opcode;
   int result;
-  bool resultReady;
-  int instNum;
   int dispatch=0;               // 0: not dispatched, 1: dispatched.
   int writebackCycle;           // cycle it will attempt writeback
 };
 
 struct SameCycleUpdate{
   int rsTag;
+  int opRegister;
   bool needsUpdate=false;
 };
 
 queue<InstrRecord> instructionQ;
 vector<int> registerFile(8);        // Register File having 8 entries 0 to 7
-vector<int> rat(8,-1);              // if RAT entry is -1, it means the RAT points to the register in the register file and not any RS
+vector<int> RAT(8,-1);              // if RAT entry is -1, it means the RAT points to the register in the register file and not any RS
 ExecutionUnit addUnit, mulUnit;
 vector<ReservationStation> RS(5);   // Reservation statisons
