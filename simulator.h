@@ -38,8 +38,13 @@ struct ReservationStation
   int result;
   bool resultReady;
   int instNum;
-  int dispatch=0;                   // 0: not dispatched, 1: dispatched.
+  int dispatch=0;               // 0: not dispatched, 1: dispatched.
   int writebackCycle;           // cycle it will attempt writeback
+};
+
+struct SameCycleUpdate{
+  int rsTag;
+  bool needsUpdate=false;
 };
 
 queue<InstrRecord> instructionQ;
