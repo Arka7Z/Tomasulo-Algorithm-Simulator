@@ -21,8 +21,8 @@ struct Broadcast{
 
 struct ExecutionUnit{
   int rsTag;
-  int val;
-  int writebackCycle;
+  int result;
+  int writebackCycle=-1;
   bool busy=false;
 };
 
@@ -38,7 +38,7 @@ struct ReservationStation
   int result;
   bool resultReady;
   int instNum;
-  int disp=0;                   // 0: not dispatched, 1: dispatched.
+  int dispatch=0;                   // 0: not dispatched, 1: dispatched.
   int writebackCycle;           // cycle it will attempt writeback
 };
 
