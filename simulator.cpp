@@ -221,9 +221,68 @@ void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)
   }
 }
 
+void init(int& targetCycle)
+{
+  int no_of_instructions;
+  cin >> no_of_instructions;
+	cout << "no_of_instructions " << no_of_instructions <<endl;
+	cin >> targetCycle;
+	cout << "no_of_cycles " << targetCycle << endl;
+	for(int i=0;i<no_of_instructions;++i){
+		InstrRecord tmp;
+		cin >> tmp.opcode >> tmp.dst >> tmp.src1>>tmp.src2;
+		instructionQ.push(tmp);
+	}
+	for(int i=0;i<8;++i)
+	{
+		cin >>registerFile[i];
+	}
+}
+
+
+
+string getOpcode(int opcode)
+{
+  switch (opcode) {
+    case 0: return "ADD";
+    case 1: return "SUB";
+    case 2: return "MUL";
+    case 3: return "DIV";
+    }
+  return "";
+}
+void prettyPrint()
+{
+  cout<<setw(8)<<"Entry"<<setw(8)<<"Busy"<<setw(8)<<"op"<<setw(8)<<"Vj"<<setw(8)<<"Vk" << setw(8)<< "Qj" << setw(8)<< "Qk" <<setw(8)<<"Disp" << "\n";
+  for(int i=0;i<RS.size();++i)
+  {
+    cout << setw(8) << "RS"+to_string(i) <<setw(8) << RS[i].busy << setw(8)<< (RS[i].busy?getOpcode(RS[i].opcode):"")<<setw(8)<<RS[i].Vj <<setw(8)<< RS[i].Vk << setw(8)<< (RS[i].Qj==-1?"":"RS"+to_string(RS[i].Qj)) <<
+      setw(8)<< (RS[i].Qk==-1?"":"RS"+to_string(RS[i].Qk)) <<setw(8)<< RS[i].dispatch << "\n";
+  }
+
+  cout << "------------------------------------\n";
+  cout << setw(8) << " " << setw(8) << "RF" << setw(8) << "RAT" << "\n";
+  for(int i=0;i<8;++i)
+  {
+    cout << setw(8) << i << setw(8) << registerFile[i] << setw(8)
+    << (RAT[i]==-1?"":"RS"+to_string(RAT[i])) << "\n";
+  }
+  cout << "-----------------------------------\n";
+  while(! instructionQ.empty())
+  {
+    InstrRecord instr=instructionQ.front();
+    instructionQ.pop();
+    cout << setw(8) << getOpcode(instr.opcode) << setw(8) << "R" + to_string(instr.dst)+","
+    << setw(8) << "R" + to_string(instr.src1)+"," << setw(8) << "R" + to_string(instr.src2)+","
+    << "\n";
+    instructionQ.push(instr);
+  }
+}
+
 int main()
 {
-  int cycle=1,targetCycle=100;
+  int cycle=1,targetCycle;
+  init(targetCycle);
   while(cycle<=targetCycle)
   {
     bool instrDispatchced=false;
@@ -234,4 +293,5 @@ int main()
       updateRAT(update);
     cycle++;
   }
+  prettyPrint();
 }
