@@ -1,10 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define add_cycles 2
-#define sub_cycles 2
-#define mul_cycles 10
-#define div_cycles 40
+#define add_latency 2
+#define sub_latency 2
+#define mul_latency 10
+#define div_latency 40
 
 
 struct InstrRecord
@@ -34,7 +34,7 @@ struct ReservationStation
   int Vj;                       // value of operand 1
   int Vk;                       // value of operand 2
   int latency;
-  int op;
+  int opcode;
   int result;
   bool resultReady;
   int instNum;
