@@ -18,7 +18,7 @@ void  dispatch_to_add_unit(int cycle,Broadcast& broadCast,bool& instrsDispatchce
     bool rsReady=false;
     int i;
     for(i=0;i<=2;i++)                          // poll the RS in decreasing priority to check readiness
-      if(RS[i].busy && RS[i].Qj==-1 && RS[i].Qk==-1)
+      if(RS[i].busy && RS[i].Qj==-1 && RS[i].Qk==-1 && RS[i].dispatch==0)
       {
         rsReady=true;
         break;
@@ -31,7 +31,7 @@ void  dispatch_to_add_unit(int cycle,Broadcast& broadCast,bool& instrsDispatchce
           broadCast.result=addUnit.result;
           broadCast.rsTag=addUnit.rsTag;
         }
-        RS[i].dispatch=1;
+        RS[i].dispatch=cycle;
         RS[i].writebackCycle=cycle+add_latency;     // cycle the instruction will attempt a writeback
         addUnit.result=RS[i].result=calculate_result(RS[i].opcode,RS[i].Vj,RS[i].Vk);
         addUnit.busy=true;
@@ -53,7 +53,7 @@ void  dispatch_to_mul_unit(int cycle, Broadcast& broadCast,bool& instrsDispatchc
     bool rsReady=false;
     int i;
     for(i=3;i<=4;i++)                          // poll the RS in decreasing priority to check readiness
-      if(RS[i].busy && RS[i].Qj==-1 && RS[i].Qk==-1)
+      if(RS[i].busy && RS[i].Qj==-1 && RS[i].Qk==-1 && RS[i].dispatch==0)
       {
         rsReady=true;
         break;
@@ -66,7 +66,7 @@ void  dispatch_to_mul_unit(int cycle, Broadcast& broadCast,bool& instrsDispatchc
           broadCast.result=mulUnit.result;
           broadCast.rsTag=mulUnit.rsTag;
         }
-        RS[i].dispatch=1;
+        RS[i].dispatch=cycle;
         RS[i].writebackCycle=cycle+(RS[i].opcode==2?mul_latency:div_latency);     // cycle the instruction will attempt a writeback
         mulUnit.busy=true;
         mulUnit.writebackCycle=cycle+(RS[i].opcode==2?mul_latency:div_latency);   // cycle the unit will attempt a writeback
@@ -139,7 +139,7 @@ SameCycleUpdate issue(int cycle)
         }
         else
         {
-          RS[i].Qj=registerFile[operand1];     // tag of first RS its waiting for
+          RS[i].Qj=RAT[operand1];     // tag of first RS its waiting for
         }
         if(RAT[operand2]==-1)                   // RAT points to registers
         {
@@ -148,7 +148,7 @@ SameCycleUpdate issue(int cycle)
         }
         else
         {
-          RS[i].Qk=registerFile[operand2];     // tag of second RS its waiting for
+          RS[i].Qk=RAT[operand2];     // tag of second RS its waiting for
         }
         update.rsTag=i;
         update.needsUpdate=true;
@@ -218,6 +218,7 @@ void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)
       }
     }
     RS[rsTag].busy=false;
+    RS[rsTag].dispatch=0;
   }
 }
 
@@ -257,7 +258,7 @@ void prettyPrint()
   for(int i=0;i<RS.size();++i)
   {
     cout << setw(8) << "RS"+to_string(i) <<setw(8) << RS[i].busy << setw(8)<< (RS[i].busy?getOpcode(RS[i].opcode):"")<<setw(8)<<RS[i].Vj <<setw(8)<< RS[i].Vk << setw(8)<< (RS[i].Qj==-1?"":"RS"+to_string(RS[i].Qj)) <<
-      setw(8)<< (RS[i].Qk==-1?"":"RS"+to_string(RS[i].Qk)) <<setw(8)<< RS[i].dispatch << "\n";
+      setw(8)<< (RS[i].Qk==-1?"":"RS"+to_string(RS[i].Qk)) <<setw(8)<< (RS[i].busy?to_string(RS[i].dispatch):"") << "\n";
   }
 
   cout << "------------------------------------\n";
@@ -268,7 +269,8 @@ void prettyPrint()
     << (RAT[i]==-1?"":"RS"+to_string(RAT[i])) << "\n";
   }
   cout << "-----------------------------------\n";
-  while(! instructionQ.empty())
+  int count=instructionQ.size();
+  while(count>0)
   {
     InstrRecord instr=instructionQ.front();
     instructionQ.pop();
@@ -276,6 +278,7 @@ void prettyPrint()
     << setw(8) << "R" + to_string(instr.src1)+"," << setw(8) << "R" + to_string(instr.src2)+","
     << "\n";
     instructionQ.push(instr);
+    count--;
   }
 }
 
@@ -285,13 +288,21 @@ int main()
   init(targetCycle);
   while(cycle<=targetCycle)
   {
+    cout<<endl<<endl<<endl<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<"      mul writeback     "<<mulUnit.writebackCycle<<endl;
     bool instrDispatchced=false;
-    Broadcast broadCast=dispatch(cycle,instrDispatchced);
+    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<endl;
+    Broadcast broadCast=dispatch(cycle,instrDispatchced);///////////
+    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<endl;
     SameCycleUpdate update=issue(cycle);
     broadcast(cycle, broadCast,instrDispatchced);
+      cout<<"ADD unit writeback "<<addUnit.writebackCycle<<"      mul writeback     "<<mulUnit.writebackCycle<<endl;
     if(update.needsUpdate)
       updateRAT(update);
+
+    cout<<"EXECUTED CYCLE"<<cycle<<endl;
+    prettyPrint();
     cycle++;
   }
-  prettyPrint();
+
 }
