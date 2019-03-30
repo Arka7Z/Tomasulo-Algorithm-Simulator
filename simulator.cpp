@@ -98,7 +98,7 @@ Broadcast dispatch(int cycle,bool& instrsDispatchced)
     return broadCastAdd;
 }
 
-SameCycleUpdate issue(int cycle)
+SameCycleUpdate issue(int cycle)                                                // issue an instruction(if possible) from the instruction queue
 {
   SameCycleUpdate update;
   update.needsUpdate=false;
@@ -159,11 +159,11 @@ SameCycleUpdate issue(int cycle)
   return update;
 }
 
-void updateRAT(SameCycleUpdate update)
+void updateRAT(SameCycleUpdate update)                                          // update RAT of the o/p register of the instruction dispatched in the current cycle
 {
   RAT[update.opRegister]=update.rsTag;
 }
-void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)
+void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)        // broadcast RS tag and result if scheduled for the current cycle
 {
   bool needToBroadcast=false;
   int rsTag,result;
@@ -222,7 +222,7 @@ void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)
   }
 }
 
-void init(int& targetCycle)
+void init(int& targetCycle)                                       // read from the input file to populate the instructionQ and register file etc.
 {
   int no_of_instructions;
   cin >> no_of_instructions;
@@ -252,23 +252,24 @@ string getOpcode(int opcode)
     }
   return "";
 }
-void prettyPrint()
+void prettyPrint()                                                     // print the status of the sytem including Reservation Stations, RAT and register contents
 {
-  cout<<setw(8)<<"Entry"<<setw(8)<<"Busy"<<setw(8)<<"op"<<setw(8)<<"Vj"<<setw(8)<<"Vk" << setw(8)<< "Qj" << setw(8)<< "Qk" <<setw(8)<<"Disp" << "\n";
+  cout<<setw(8)<<"Entry"<<setw(8)<<"Busy"<<setw(8)<<"op"<<setw(8)<<"Vj"<<setw(8)<<"Vk" << setw(8)<< "Qj" << setw(8)<< "Qk" <<setw(8)<<"Disp" << endl;
   for(int i=0;i<RS.size();++i)
   {
-    cout << setw(8) << "RS"+to_string(i) <<setw(8) << RS[i].busy << setw(8)<< (RS[i].busy?getOpcode(RS[i].opcode):"")<<setw(8)<<RS[i].Vj <<setw(8)<< RS[i].Vk << setw(8)<< (RS[i].Qj==-1?"":"RS"+to_string(RS[i].Qj)) <<
-      setw(8)<< (RS[i].Qk==-1?"":"RS"+to_string(RS[i].Qk)) <<setw(8)<< (RS[i].busy?to_string(RS[i].dispatch):"") << "\n";
+    cout << setw(8) << "RS"+to_string(i) <<setw(8) << RS[i].busy << setw(8)<< (RS[i].busy?getOpcode(RS[i].opcode):"")<<setw(8)<<(RS[i].busy ?to_string(RS[i].Vj):"") <<setw(8)<<(RS[i].busy ?to_string(RS[i].Vk):"")<< setw(8)<< (RS[i].Qj==-1?"":"RS"+to_string(RS[i].Qj)) <<
+      setw(8)<< (RS[i].Qk==-1?"":"RS"+to_string(RS[i].Qk)) <<setw(8)<< (RS[i].busy && RS[i].dispatch!=0 ?to_string(RS[i].dispatch):"") <<endl;
   }
 
-  cout << "------------------------------------\n";
-  cout << setw(8) << " " << setw(8) << "RF" << setw(8) << "RAT" << "\n";
+  cout << "------------------------------------"<<endl;
+  cout << setw(8) << " " << setw(8) << "RF" << setw(8) << "RAT" << endl;
   for(int i=0;i<8;++i)
   {
     cout << setw(8) << i << setw(8) << registerFile[i] << setw(8)
-    << (RAT[i]==-1?"":"RS"+to_string(RAT[i])) << "\n";
+    << (RAT[i]==-1?"":"RS"+to_string(RAT[i])) << endl;
   }
-  cout << "-----------------------------------\n";
+  cout << "-----------------------------------"<<endl;
+  cout<<"Instruction queue(printing from the front first):"<<endl;
   int count=instructionQ.size();
   while(count>0)
   {
@@ -276,7 +277,7 @@ void prettyPrint()
     instructionQ.pop();
     cout << setw(8) << getOpcode(instr.opcode) << setw(8) << "R" + to_string(instr.dst)+","
     << setw(8) << "R" + to_string(instr.src1)+"," << setw(8) << "R" + to_string(instr.src2)+","
-    << "\n";
+    << endl;
     instructionQ.push(instr);
     count--;
   }
@@ -289,14 +290,10 @@ int main()
   while(cycle<=targetCycle)
   {
     cout<<endl<<endl<<endl<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
-    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<"      mul writeback     "<<mulUnit.writebackCycle<<endl;
     bool instrDispatchced=false;
-    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<endl;
     Broadcast broadCast=dispatch(cycle,instrDispatchced);///////////
-    cout<<"ADD unit writeback "<<addUnit.writebackCycle<<endl;
     SameCycleUpdate update=issue(cycle);
     broadcast(cycle, broadCast,instrDispatchced);
-      cout<<"ADD unit writeback "<<addUnit.writebackCycle<<"      mul writeback     "<<mulUnit.writebackCycle<<endl;
     if(update.needsUpdate)
       updateRAT(update);
 
