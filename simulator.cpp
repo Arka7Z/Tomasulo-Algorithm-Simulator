@@ -80,7 +80,7 @@ void  dispatch_to_mul_unit(int cycle, Broadcast& broadCast,bool& instrsDispatchc
 
 }
 
-Broadcast dispatch(int cycle,bool& instrsDispatchced)
+Broadcast dispatch(int cycle,bool& instrsDispatchced)                  // Function to dispatch any available instr. to the mul XOR add unit
 {
   if(cycle==addUnit.writebackCycle && cycle==mulUnit.writebackCycle)
     addUnit.writebackCycle++;
@@ -92,7 +92,7 @@ Broadcast dispatch(int cycle,bool& instrsDispatchced)
   broadCastMul.freeUnit=true;
   dispatch_to_add_unit(cycle,broadCastAdd,instrsDispatchced);
   dispatch_to_mul_unit(cycle,broadCastMul,instrsDispatchced);
-  if(broadCastMul.willBroadcast==true)
+  if(broadCastMul.willBroadcast==true)                  // As during dispatch, the execution units are overwritten, broadcast scheduled, if any, are saved and returned for broadcast function
     return broadCastMul;
   else
     return broadCastAdd;
@@ -108,7 +108,7 @@ SameCycleUpdate issue(int cycle)                                                
     bool rsAvailable=false;int i=-1;
     if(instr.opcode<=1)
     {
-      for(i=0;i<=2;i++)
+      for(i=0;i<=2;i++)                                                        // Poll RS for the add unit
         if(RS[i].busy==false)
         {
           rsAvailable=true;
@@ -117,7 +117,7 @@ SameCycleUpdate issue(int cycle)                                                
     }
     else
     {
-      for(i=3;i<=4;i++)
+      for(i=3;i<=4;i++)                                                        // Poll RS for the mul unit
         if(RS[i].busy==false)
         {
           rsAvailable=true;
@@ -126,7 +126,7 @@ SameCycleUpdate issue(int cycle)                                                
     }
     if(rsAvailable)
     {
-        // issue the instruction from the instr Q to the RS i
+                                                 // issue the instruction from the instr Q to the RS i
         instructionQ.pop();
         RS[i].busy=true;
         RS[i].opcode=instr.opcode;
@@ -177,7 +177,7 @@ void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)        
       // no neeed to free execution unit as an instruction is dispatched there
     }
   }
-  else                     // Units not overwritten, check writeback using writebackCycles of units, add & mul wb conflict handled in dispatch stage
+  else                                       // Units not overwritten, check writeback using writebackCycles of units, add & mul wb conflict handled in dispatch stage
   {
       if(mulUnit.writebackCycle==cycle)
       {
@@ -242,7 +242,7 @@ void init(int& targetCycle)                                       // read from t
 
 
 
-string getOpcode(int opcode)
+string getOpcode(int opcode)                                        // convert opcode to string
 {
   switch (opcode) {
     case 0: return "ADD";
