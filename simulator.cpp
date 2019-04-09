@@ -204,7 +204,7 @@ void broadcast(int cycle, Broadcast& broadCast, bool& instrsDispatchced)        
         registerFile[i]=result;
         RAT[i]=-1;
       }
-    for(int i=0;i<5;i++)
+    for(int i=0;i<5;i++)                                       // Poll the RS to check if any instruction was waiting on this broadcast, by matching the RS tag of broadcast
     {
       if(RS[i].busy && RS[i].Qj==rsTag)
       {
@@ -226,9 +226,8 @@ void init(int& targetCycle)                                       // read from t
 {
   int no_of_instructions;
   cin >> no_of_instructions;
-	cout << "no_of_instructions " << no_of_instructions <<endl;
+	
 	cin >> targetCycle;
-	cout << "no_of_cycles " << targetCycle << endl;
 	for(int i=0;i<no_of_instructions;++i){
 		InstrRecord tmp;
 		cin >> tmp.opcode >> tmp.dst >> tmp.src1>>tmp.src2;
@@ -269,8 +268,8 @@ void prettyPrint()                                                     // print 
     << (RAT[i]==-1?"":"RS"+to_string(RAT[i])) << endl;
   }
   cout << "-----------------------------------"<<endl;
-  cout<<"Instruction queue(printing from the front first):"<<endl;
-  int count=instructionQ.size();
+  cout<<"Instruction queue(printing from the front of the queue first):"<<endl;
+  int count=instructionQ.size();                                        // print the instruction Queue
   while(count>0)
   {
     InstrRecord instr=instructionQ.front();
@@ -289,17 +288,15 @@ int main()
   init(targetCycle);
   while(cycle<=targetCycle)
   {
-    cout<<endl<<endl<<endl<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
+   
     bool instrDispatchced=false;
     Broadcast broadCast=dispatch(cycle,instrDispatchced);///////////
     SameCycleUpdate update=issue(cycle);
     broadcast(cycle, broadCast,instrDispatchced);
     if(update.needsUpdate)
-      updateRAT(update);
-
-    cout<<"EXECUTED CYCLE"<<cycle<<endl;
-    prettyPrint();
+      updateRAT(update);    
     cycle++;
   }
+  prettyPrint();
 
 }

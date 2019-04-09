@@ -1,0 +1,18 @@
+   Entry    Busy      op      Vj      Vk      Qj      Qk    Disp
+     RS0       0                                                
+     RS1       0                                                
+     RS2       1     ADD      84      -9                      14
+     RS3       0                                                
+     RS4       1     DIV      84       4                      14
+------------------------------------
+              RF     RAT
+       0       3        
+       1      -9        
+       2      12        
+       3      21     RS2
+       4     -21        
+       5      84        
+       6       9        
+       7       0        
+-----------------------------------
+Instruction queue(printing from the front of the queue first):

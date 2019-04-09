@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define add_latency 2
+#define add_latency 2             // latencies for the instructions as specified in the assignment
 #define sub_latency 2
 #define mul_latency 10
 #define div_latency 40
